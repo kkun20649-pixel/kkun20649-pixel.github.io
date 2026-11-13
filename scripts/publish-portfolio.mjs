@@ -1,8 +1,10 @@
 import { createWriteStream } from 'node:fs';
-import { cp, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { appendFile, cp, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { setTimeout as delay } from 'node:timers/promises';
 
 const origin = 'https://aigc-screenworks-k7.kkun20649.chatgpt.site';
 const root = process.cwd();
@@ -11,10 +13,35 @@ if (output === root) throw new Error('Use an empty output directory.');
 
 const aliases = JSON.parse(await readFile('scripts/portfolio-aliases.json', 'utf8'));
 const template = await readFile('index.html', 'utf8');
-const response = await fetch(origin + '/api/catalogue', { redirect: 'error', signal: AbortSignal.timeout(30000) });
+async function fetchWithRetry(url, timeout) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(timeout) });
+      if (response.status < 500 || attempt === 2) return response;
+      await response.body?.cancel();
+    } catch (error) {
+      if (attempt === 2) throw error;
+    }
+    await delay(1000 * (attempt + 1));
+  }
+}
+
+const response = await fetchWithRetry(origin + '/api/catalogue', 30000);
 if (!response.ok) throw new Error('Could not load the published catalogue: ' + response.status);
-const { categories, works } = await response.json();
+const catalogue = await response.text();
+const { categories, works } = JSON.parse(catalogue);
 if (!Array.isArray(categories) || !Array.isArray(works) || !categories.length) throw new Error('Invalid catalogue');
+
+const revision = createHash('sha256').update(catalogue).digest('hex');
+const workflowOutput = process.env.GITHUB_OUTPUT;
+if (workflowOutput && process.env.GITHUB_EVENT_NAME === 'schedule') {
+  const current = await fetchWithRetry('https://kkun20649-pixel.github.io/catalogue-revision.txt', 15000);
+  if (current.ok && (await current.text()).trim() === revision) {
+    await appendFile(workflowOutput, 'changed=false\n');
+    console.log('The public catalogue is already current.');
+    process.exit(0);
+  }
+}
 
 const safeId = /^[a-f0-9-]{36}$/;
 const safeKey = /^[a-f0-9-]{36}\.(mp4|webm|jpg|png|webp)$/;
@@ -67,7 +94,7 @@ for (const key of assets) {
     await cp(source, target);
     continue;
   }
-  const media = await fetch(origin + '/api/media/' + key, { redirect: 'error', signal: AbortSignal.timeout(180000) });
+  const media = await fetchWithRetry(origin + '/api/media/' + key, 180000);
   if (!media.ok || !media.body) throw new Error('Could not fetch public media: ' + key);
   const length = Number(media.headers.get('content-length'));
   if (!Number.isSafeInteger(length) || length <= 0 || size + length > 950 * 1024 * 1024) {
@@ -169,3 +196,5 @@ for (const work of visible) {
   await writeFile(join(pageDir, 'index.html'), detail(work));
 }
 console.log('Built ' + visible.length + ' published works and ' + assets.size + ' media files.');
+await writeFile(join(output, 'catalogue-revision.txt'), revision + '\n');
+if (workflowOutput) await appendFile(workflowOutput, 'changed=true\n');

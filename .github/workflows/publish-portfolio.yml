@@ -2,6 +2,8 @@ name: 发布作品集
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '3-58/5 * * * *'
 
 concurrency:
   group: portfolio-pages
@@ -14,18 +16,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      changed: ${{ steps.build.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
       - name: Build from published works
+        id: build
         run: node scripts/publish-portfolio.mjs dist
       - uses: actions/upload-pages-artifact@v4
+        if: steps.build.outputs.changed == 'true'
         with:
           path: dist
   deploy:
     needs: build
+    if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write
