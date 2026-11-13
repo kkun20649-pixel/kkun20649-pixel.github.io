@@ -186,7 +186,57 @@ h1, h2, h3, p, figure { margin: 0; }
 
 :root{color-scheme:dark;--bg:#171918;--surface:#222522;--ink:#eeeae0;--muted:#a5aaa2;--line:#393e38;--accent:#c4d69e}
 .wrap{width:min(1320px,calc(100% - 9vw))}.topbar-inner{min-height:88px}.brand{letter-spacing:.08em}.hero{min-height:680px;gap:70px;padding-block:75px 100px}.hero h1{font-family:Inter,"Microsoft YaHei",sans-serif;font-size:clamp(48px,6.2vw,90px);font-weight:650;line-height:1.18;letter-spacing:-.055em;margin-top:22px}.hero-description{font-size:16px;line-height:1.95}.hero-artwork{padding:0;gap:24px}.hero-artwork:before{display:none}.hero-print+.hero-print{margin-top:80px}.print-frame{padding:0;border:0;background:transparent;box-shadow:0 25px 65px #0007}.print-frame img{background:#242722}.hero-print figcaption{padding-top:17px}.button.primary{background:var(--accent);color:#1c2415;border-radius:28px;padding:14px 24px}.button.primary:hover{background:#d4e4b4}.section-header{padding-block:36px 24px}.section-header h2{font-size:32px}.catalogue-search{background:transparent;border-radius:25px;padding-inline:18px}.catalogue-controls{padding-block:14px 25px}.section-nav{gap:8px}.section-nav button{border:0;border-radius:24px;background:transparent;padding:10px 15px}.section-nav button[aria-pressed=true]{background:var(--accent);color:#20281b}.section-nav button[aria-pressed=true] small{color:#38472d}.work-group{padding-block:36px 48px}.group-header{padding-bottom:24px}.group-header h2{font-size:23px;font-weight:500}.card-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}.work-card{background:transparent;border:0;border-radius:0;overflow:visible}.work-image{aspect-ratio:16/10;border-radius:8px;background:#242824}.work-image img{transition:transform .45s ease}.work-card:hover{transform:none}.work-card:hover img{transform:scale(1.035)}.work-card-info{padding:18px 0 7px}.work-card-info h3{font-size:19px;font-weight:550}.work-card-info p{font-size:13px;line-height:1.7;margin-top:8px}.work-category{font-size:11px;letter-spacing:.06em;margin-bottom:8px}.work-stats{max-width:28em}.poster-card .work-image{padding:18px;background:#242722}.detail-title{padding:48px 0 35px}.detail-title h1{font-weight:550}.player video,.video-cover{border-radius:10px}.video-cover span{border-radius:32px;background:#171c15d9;padding:15px 25px}.detail-copy{padding-top:14px}.detail-copy p{max-width:70ch}.footer{padding-block:30px 45px}.empty[hidden],.work-group[hidden],.work-card[hidden]{display:none}
-@media(min-width:1001px){#category-drama .card-list{max-width:800px;grid-template-columns:1fr}#category-drama .work-image{aspect-ratio:21/9}}
 @media(max-width:1000px){.hero{gap:32px;min-height:580px}.card-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.hero{grid-template-columns:1fr;min-height:0;padding-block:45px 55px;gap:40px}.hero-artwork{max-width:540px}.hero h1{font-size:clamp(48px,10vw,75px)}.hero-print+.hero-print{margin-top:40px}.topbar-inner{min-height:70px}.catalogue-controls{position:static}.work-group{padding-block:28px 35px}}
 @media(max-width:520px){.wrap{width:calc(100% - 36px)}.card-list{grid-template-columns:1fr;gap:28px}.poster-card .work-image{aspect-ratio:4/5}.hero-artwork{gap:16px}.hero-print figcaption{font-size:12px}.work-card-info h3{font-size:19px}.work-card-info p{font-size:13px}.footer{flex-wrap:wrap;gap:20px}.detail-title h1{font-size:34px}.section-nav button{padding:9px 12px}}
+/* The two lead works share a row. The Douyin section uses a compact film grid. */
+.hero {
+  grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr);
+  min-height: 0;
+  padding-block: clamp(56px, 7vw, 100px);
+}
+.hero h1 { font-size: clamp(48px, 5.9vw, 88px); }
+.hero-artwork {
+  grid-template-columns: minmax(0, 1fr) minmax(0, .32fr);
+  align-items: end;
+  gap: clamp(12px, 1.6vw, 22px);
+}
+.hero-print-main .print-frame img { aspect-ratio: 4 / 3; height: auto; }
+.hero-print + .hero-print { margin-top: 0; }
+.hero-print + .hero-print .print-frame img { aspect-ratio: auto; height: auto; }
+.print-frame { border-radius: 8px; overflow: hidden; }
+.hero-print figcaption { padding-top: 12px; }
+
+.works-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(20px, 3vw, 40px);
+}
+.works-section > * { min-width: 0; grid-column: 1 / -1; }
+#category-drama, #category-film { grid-column: auto; }
+#category-drama .card-list, #category-film .card-list { grid-template-columns: minmax(0, 1fr); }
+#category-drama .work-image { aspect-ratio: 4 / 3; }
+#category-film .work-image { aspect-ratio: 4 / 3; }
+#category-film .work-image img { object-fit: contain; }
+#category-douyin .card-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#category-douyin .work-image { aspect-ratio: 16 / 9; }
+.catalogue-controls { align-items: start; }
+.result-count { padding-top: .7em; white-space: nowrap; }
+.section-nav button:focus-visible, .work-card:focus-visible { outline-offset: 4px; }
+
+@media (max-width: 1000px) {
+  #category-douyin .card-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 42px 48px; gap: 30px; }
+  .hero h1 { font-size: clamp(42px, 10vw, 70px); }
+  .hero-artwork { max-width: none; }
+  .catalogue-controls { gap: 4px; }
+}
+@media (max-width: 520px) {
+  .works-section { grid-template-columns: minmax(0, 1fr); }
+  #category-douyin .card-list { grid-template-columns: minmax(0, 1fr); }
+  .hero-artwork { grid-template-columns: minmax(0, 1fr); }
+  .hero-print + .hero-print { display: none; }
+  .section-nav button { min-height: 42px; }
+}
