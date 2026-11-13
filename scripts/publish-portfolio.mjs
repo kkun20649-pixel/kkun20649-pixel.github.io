@@ -13,10 +13,10 @@ if (output === root) throw new Error('Use an empty output directory.');
 
 const aliases = JSON.parse(await readFile('scripts/portfolio-aliases.json', 'utf8'));
 const template = await readFile('index.html', 'utf8');
-async function fetchWithRetry(url, timeout) {
+async function fetchWithRetry(url, timeout, method = 'GET') {
   for (let attempt = 0; ; attempt++) {
     try {
-      const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(timeout) });
+      const response = await fetch(url, { method, redirect: 'error', signal: AbortSignal.timeout(timeout) });
       if (response.status < 500 || attempt === 2) return response;
       await response.body?.cancel();
     } catch (error) {
@@ -81,6 +81,7 @@ for (const file of ['portfolio.css', 'portfolio.js', 'player.js', 'favicon.svg',
 await mkdir(join(output, 'api/media'), { recursive: true });
 
 let size = 0;
+const mediaBudget = 950 * 1024 * 1024;
 for (const key of assets) {
   const name = assetName(key);
   const source = join(root, 'api/media', name);
@@ -90,18 +91,28 @@ for (const key of assets) {
     return null;
   });
   if (cached?.isFile() && cached.size > 0) {
+    if (size + cached.size > mediaBudget) throw new Error('The media collection exceeds the Pages size budget.');
     size += cached.size;
     await cp(source, target);
     continue;
   }
-  const media = await fetchWithRetry(origin + '/api/media/' + key, 180000);
+  const url = origin + '/api/media/' + key;
+  // The Sites proxy may stream GET without Content-Length. HEAD retains the stored size.
+  const metadata = await fetchWithRetry(url, 30000, 'HEAD');
+  const length = Number(metadata.headers.get('content-length'));
+  if (!metadata.ok || !Number.isSafeInteger(length) || length <= 0) throw new Error('Could not read public media size: ' + key);
+  if (size + length > mediaBudget) throw new Error('The media collection exceeds the Pages size budget.');
+  const media = await fetchWithRetry(url, 180000);
   if (!media.ok || !media.body) throw new Error('Could not fetch public media: ' + key);
-  const length = Number(media.headers.get('content-length'));
-  if (!Number.isSafeInteger(length) || length <= 0 || size + length > 950 * 1024 * 1024) {
-    throw new Error('The media collection exceeds the Pages size budget or has an unknown size.');
-  }
-  await pipeline(Readable.fromWeb(media.body), createWriteStream(target));
-  if ((await stat(target)).size !== length) throw new Error('Incomplete media download: ' + key);
+  let received = 0;
+  await pipeline(Readable.fromWeb(media.body), async function* (chunks) {
+    for await (const chunk of chunks) {
+      received += chunk.length;
+      if (received > length) throw new Error('Unexpected media size: ' + key);
+      yield chunk;
+    }
+  }, createWriteStream(target));
+  if (received !== length) throw new Error('Incomplete media download: ' + key);
   size += length;
 }
 
