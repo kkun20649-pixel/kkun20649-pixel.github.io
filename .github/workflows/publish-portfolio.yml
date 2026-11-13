@@ -1,0 +1,39 @@
+name: 发布作品集
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: portfolio-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build from published works
+        run: node scripts/publish-portfolio.mjs dist
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy portfolio
+        id: deploy
+        uses: actions/deploy-pages@v4

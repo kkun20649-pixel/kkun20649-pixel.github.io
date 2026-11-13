@@ -1,0 +1,22 @@
+{
+  "media": {
+    "15696c75-3832-40aa-b475-bcf7f3c931fd.jpg": "editing-1.jpg",
+    "9e9ad043-9260-4b2d-a856-c68dbd46c087.mp4": "editing-1.mp4",
+    "d0708fa3-b365-42c1-a4d8-13e76fea7b0d.jpg": "editing-6.jpg",
+    "f6a621f9-b4af-453e-8c6a-cb6b4bdd6d16.mp4": "editing-6.mp4",
+    "9e47d7d7-58a3-4aac-8602-0589afbc008f.jpg": "editing-9.jpg",
+    "5552e027-4d72-47cf-81d9-d587315fcbdf.mp4": "editing-9.mp4",
+    "df823cf2-35ed-4811-bccd-3154a5b3abd4.jpg": "editing-14.jpg",
+    "a3bc5fc8-0d42-4e5d-be3e-884791c872cf.mp4": "editing-14.mp4",
+    "426c9ca4-7757-45fc-97eb-352588305090.jpg": "editing-16.jpg",
+    "6859fa0d-23e2-4537-8820-c251e5c94e7f.mp4": "editing-16.mp4",
+    "33205d44-4b14-4c36-a276-208d1c22288e.webp": "guirei-throne-4x3.webp"
+  },
+  "routes": {
+    "7ffb54e4-4d6f-4a12-bce6-d7473874df54": "editing-1",
+    "1bc8ae5b-d985-4ff3-ae92-d828ae2ddebe": "editing-6",
+    "541a1bac-9338-4e28-9769-e53a41be787e": "editing-9",
+    "2caf2bf4-cd96-4464-baef-cf3b5259fd96": "editing-14",
+    "1a3e80b3-5f83-4276-ac0c-e8e3cdc48505": "editing-16"
+  }
+}

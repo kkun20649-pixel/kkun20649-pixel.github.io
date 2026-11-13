@@ -113,6 +113,7 @@ h1, h2, h3, p, figure { margin: 0; }
 .video-cover:hover span { background: #364a3e; }
 .player-link { padding: 48px 24px; background: var(--surface); }
 .episodes { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 13px; }
+.episodes[hidden] { display: none; }
 .episodes button { display: inline-flex; align-items: center; gap: 5px; padding: 9px 12px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); border-radius: 3px; }
 .episodes button[aria-pressed="true"] { background: #26332b; color: #fffdf8; border-color: #26332b; }
 .detail-copy { display: grid; gap: 23px; justify-items: start; margin-top: 30px; }
