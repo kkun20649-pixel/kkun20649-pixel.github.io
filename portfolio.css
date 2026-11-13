@@ -27,6 +27,17 @@ h1, h2, h3, p, figure { margin: 0; }
 .topbar nav { gap: clamp(12px, 3vw, 40px); font-size: .85rem; white-space: nowrap; }
 .subtle, .back-link { gap: 4px; color: var(--muted); font-size: .83rem; }
 .topbar a:hover, .subtle:hover, .back-link:hover { color: var(--accent); }
+.edit-works-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.edit-works-link:hover { border-color: var(--accent); }
 
 .hero { min-height: 510px; display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); align-items: center; gap: clamp(27px, 5vw, 78px); padding-block: clamp(44px, 5.8vw, 83px); }
 .hero h1 { font-family: "Noto Serif SC", "Songti SC", STSong, SimSun, serif; font-size: clamp(3.05rem, 6.05vw, 6.15rem); font-weight: 800; line-height: 1.09; letter-spacing: -.055em; }
