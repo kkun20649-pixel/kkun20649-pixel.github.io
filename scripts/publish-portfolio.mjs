@@ -144,24 +144,29 @@ const groups = populated.map(({ id, label, members }) =>
   text(label) + '</h2><span>' + members.length + ' 件</span></div><div class="card-list">' +
   members.map(card).join('') + '</div></section>').join('');
 
-const featured = [
-  [visible.find(work => work.category === 'drama' && work.title.includes('诡王萝莉') && work.cover), 'AI 漫剧海报', ' hero-print-main'],
-  [visible.find(work => work.category === 'design' && work.title.includes('昭君出塞') && work.cover), 'PS 视觉设计', '']
-].filter(([work]) => work);
-const hero = featured.length ? '<div class="hero-artwork" aria-label="精选作品图片">' + featured.map(([work, label, cls], i) =>
-  '<figure class="hero-print' + cls + '"><div class="print-frame"><img src="' + asset(work.cover) + '" alt="' +
-  escape(work.title) + '" fetchpriority="' + (i === 0 ? 'high' : 'auto') + '"></div><figcaption><span>' +
-  text(work.title) + '</span><small>' + label + '</small></figcaption></figure>').join('') + '</div>' : '';
+const leadFilm = visible.find(work => work.id === '9db8793b-086a-4b6d-a7bb-6bc56edd8b34');
+const shortcuts = populated.map(({ id, label, members }) =>
+  '<a href="#category-' + escape(id) + '">' + text(label) + '<small>' + members.length + '</small></a>').join('');
+const hero = '<section class="opening" aria-labelledby="opening-title"><div class="wrap opening-frame">' +
+  (leadFilm?.cover ? '<img class="opening-cover" src="' + asset(leadFilm.cover) + '" alt="" fetchpriority="high">' : '') +
+  '<div class="opening-copy"><p class="opening-label">AI 影视制作 · 剪辑 · 视觉设计</p>' +
+  (leadFilm ? '<h1 id="opening-title">藏锋</h1><p class="opening-meta">春秋历史短片 <span aria-hidden="true">/</span> 8 分 30 秒</p>' +
+    '<p class="opening-logline">从入吴为奴到归国蓄力，勾践终于攻入吴宫。胜负已定，他要决定这场仗如何结束。</p>' :
+    '<h1 id="opening-title">影像与视觉作品集</h1>') +
+  '<div class="opening-actions">' +
+  (leadFilm ? '<a class="button opening-watch" href="/works/' + route(leadFilm) + '/#film-player"><span aria-hidden="true">▶</span> 观看《藏锋》</a>' : '') +
+  '<a class="button opening-browse" href="#works">浏览全部 ' + visible.length + ' 件作品 <span aria-hidden="true">↓</span></a></div></div></div>' +
+  (shortcuts ? '<nav class="wrap opening-nav" aria-label="快速浏览作品分类">' + shortcuts + '</nav>' : '') + '</section>';
 
 const start = template.indexOf('<section class="work-group"');
 const end = template.indexOf('<p class="empty"', start);
-if (start < 0 || end < 0 || !template.includes('aria-label="作品分类筛选"') || !template.includes('class="hero-artwork"')) {
+if (start < 0 || end < 0 || !template.includes('aria-label="作品分类筛选"') || !template.includes('<!-- portfolio-opening -->')) {
   throw new Error('The homepage template has changed.');
 }
 const index = (template.slice(0, start) + groups + template.slice(end))
   .replace(/(<nav class="section-nav" aria-label="作品分类筛选">)[\s\S]*?<\/nav>/, (_, open) => open + filters + '</nav>')
   .replace(/(<p class="result-count" role="status">)[^<]+/, (_, open) => open + visible.length + ' 件作品')
-  .replace(/<div class="hero-artwork"[\s\S]*?<\/figure><\/div>/, () => hero);
+  .replace('<!-- portfolio-opening -->', () => hero);
 await writeFile(join(output, 'index.html'), index);
 
 function detail(work) {
@@ -180,7 +185,7 @@ function detail(work) {
         (videos.length > 1 ? ' ' + text(first.label) : '视频') + '</span></button>'
       : '<div class="player-link"><a class="button primary" target="_blank" rel="noreferrer" href="' +
         external(first.url) + '">' + text(first.label) + ' ↗</a></div>';
-    player = '<section class="player" aria-label="作品视频" data-poster="' + poster + '"><div data-screen>' + initial +
+    player = '<section class="player" id="film-player" aria-label="作品视频" data-poster="' + poster + '"><div data-screen>' + initial +
       '</div><div class="episodes" aria-label="选择分集"' + (videos.length === 1 ? ' hidden' : '') + '>' + options + '</div></section>';
   }
   const gallery = images.length ? '<section class="poster-gallery" aria-label="完整设计图">' + images.map(image =>
